@@ -11,26 +11,28 @@ export const HistoryGrid: React.FC<HistoryGridProps> = ({ history, onSelect }) =
   if (history.length === 0) return null;
 
   return (
-    <div className="mt-8">
-      <h3 className="text-slate-400 font-medium flex items-center gap-2 mb-4">
-        <Clock size={16} /> Recent Designs
+    <div>
+      <h3 className="text-gray-500 text-sm font-semibold flex items-center gap-2 mb-4 uppercase tracking-wider">
+        <Clock size={14} /> Recent Generations
       </h3>
-      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3">
         {history.map((logo) => (
           <button
             key={logo.id}
             onClick={() => onSelect(logo)}
-            className="relative aspect-square group rounded-xl overflow-hidden border border-slate-700 bg-slate-800 hover:border-brand-500 transition-all"
+            className="relative aspect-square group rounded-lg overflow-hidden border border-gray-200 bg-white hover:border-black hover:shadow-md transition-all"
           >
-            <img 
-              src={logo.imageUrl} 
-              alt="History item" 
-              className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
-              <p className="text-xs text-white truncate w-full text-left">
-                {new Date(logo.createdAt).toLocaleTimeString()}
-              </p>
+            <div className="p-2 w-full h-full flex items-center justify-center">
+                <img 
+                src={logo.imageUrl} 
+                alt="History item" 
+                className="max-w-full max-h-full object-contain"
+                />
+            </div>
+            
+            {/* Timestamp hover */}
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="text-white text-xs font-medium">Load</span>
             </div>
           </button>
         ))}

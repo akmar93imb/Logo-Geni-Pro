@@ -23,12 +23,13 @@ export const PreviewArea: React.FC<PreviewAreaProps> = ({ currentLogo, isGenerat
   return (
     <div className="flex flex-col h-full gap-6">
       {/* Main Canvas Area */}
-      <div className="relative flex-grow bg-slate-900/50 rounded-3xl border border-slate-700 shadow-2xl overflow-hidden flex items-center justify-center p-8 group backdrop-blur-sm min-h-[300px]">
+      <div className="relative flex-grow bg-gray-50 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center p-8 min-h-[400px]">
         
-        {/* Transparency Grid Background */}
-        <div className="absolute inset-0 z-0 opacity-20" 
+        {/* Subtle Checkerboard for transparency indication */}
+        <div className="absolute inset-0 z-0 opacity-[0.03]" 
              style={{ 
-               backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M0 0h10v10H0V0zm10 10h10v10H10V10z'/%3E%3C/g%3E%3C/svg%3E")` 
+               backgroundImage: `radial-gradient(#000 1px, transparent 1px)`,
+               backgroundSize: '20px 20px'
              }}>
         </div>
 
@@ -36,80 +37,77 @@ export const PreviewArea: React.FC<PreviewAreaProps> = ({ currentLogo, isGenerat
         <div className="relative z-10 w-full h-full flex items-center justify-center">
           {isGenerating ? (
             <div className="flex flex-col items-center gap-4 animate-pulse">
-              <div className="relative">
-                <div className="w-32 h-32 rounded-full border-4 border-brand-500/30 border-t-brand-400 animate-spin"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Wand2 className="text-brand-400 animate-bounce" size={32} />
-                </div>
-              </div>
-              <p className="text-brand-200 font-medium tracking-wide">Conjuring your brand identity...</p>
+              <div className="w-16 h-16 rounded-full border-4 border-gray-200 border-t-black animate-spin"></div>
+              <p className="text-gray-500 font-medium text-sm">Designing...</p>
             </div>
           ) : currentLogo ? (
             <img 
               src={currentLogo.imageUrl} 
               alt="Generated Logo" 
-              className="max-w-full max-h-full object-contain drop-shadow-2xl rounded-lg shadow-black/50"
+              className="max-w-full max-h-full object-contain drop-shadow-xl"
             />
           ) : (
-            <div className="text-center space-y-4 text-slate-500">
-              <div className="w-24 h-24 mx-auto bg-slate-800/50 rounded-full flex items-center justify-center border-2 border-dashed border-slate-700">
-                <Share2 className="opacity-20" size={40} />
+            <div className="text-center space-y-4 text-gray-400">
+              <div className="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center border border-gray-200 shadow-sm">
+                <Share2 className="opacity-30" size={32} />
               </div>
               <div className="space-y-1">
-                <p className="text-lg font-medium text-slate-400">Ready to Create</p>
-                <p className="text-sm opacity-60 max-w-xs mx-auto">Fill out the form on the left to generate your unique professional logo</p>
+                <p className="text-gray-900 font-medium">No logo generated yet</p>
+                <p className="text-sm text-gray-500">Fill out the form to start creating</p>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Action Toolbar - Always visible when logo exists */}
-      <div className={`
-        grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-all duration-500
-        ${currentLogo && !isGenerating ? 'opacity-100 translate-y-0' : 'opacity-50 pointer-events-none grayscale'}
-      `}>
+      {/* Action Toolbar */}
+      <div className="flex items-center gap-3">
         
-        {/* Remix Button */}
-        <button 
-          onClick={() => currentLogo && onRemix(currentLogo)}
-          disabled={!currentLogo || isGenerating}
-          className="flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-slate-800 border border-slate-600 text-white font-semibold hover:bg-slate-700 hover:border-brand-400 transition-all hover:-translate-y-1 shadow-lg group"
-        >
-          <div className="p-2 bg-brand-500/20 rounded-lg group-hover:bg-brand-500 text-brand-400 group-hover:text-white transition-colors">
-            <RefreshCw size={20} />
-          </div>
-          <div className="text-left">
-            <div className="text-xs text-slate-400 font-normal">Like this idea?</div>
-            <div className="text-sm">Generate Variations</div>
-          </div>
-        </button>
-
-        {/* Download Button */}
+        {/* Download Button - Primary High Visibility */}
         <button 
           onClick={handleDownload}
           disabled={!currentLogo || isGenerating}
-          className="flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white font-bold hover:from-brand-500 hover:to-indigo-500 transition-all hover:-translate-y-1 shadow-lg shadow-brand-900/50"
+          className={`
+            flex-grow flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all
+            ${!currentLogo || isGenerating 
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+              : 'bg-black text-white hover:bg-gray-800 shadow-sm hover:shadow-md'}
+          `}
         >
-          <div className="p-2 bg-white/20 rounded-lg">
-            <Download size={24} />
-          </div>
-          <div className="text-left">
-            <div className="text-xs text-brand-100 font-normal">High Quality</div>
-            <div className="text-sm">Download PNG</div>
-          </div>
+          <Download size={18} />
+          <span>Download PNG</span>
         </button>
 
-        {/* View Fullscreen / Share */}
+        {/* Remix Button - Secondary */}
         <button 
-          className="flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-slate-800 border border-slate-600 text-slate-300 font-semibold hover:bg-slate-700 hover:text-white transition-all hover:-translate-y-1 shadow-lg md:col-span-2 lg:col-span-1"
+          onClick={() => currentLogo && onRemix(currentLogo)}
+          disabled={!currentLogo || isGenerating}
+          className={`
+            px-6 py-3 rounded-lg font-medium border transition-all flex items-center gap-2
+            ${!currentLogo || isGenerating 
+              ? 'bg-white border-gray-200 text-gray-300 cursor-not-allowed' 
+              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 hover:text-black'}
+          `}
+        >
+          <RefreshCw size={18} />
+          <span className="hidden sm:inline">Remix</span>
+        </button>
+
+         {/* Fullscreen Button - Icon Only */}
+         <button 
           onClick={() => {
              if(currentLogo) window.open(currentLogo.imageUrl, '_blank');
           }}
           disabled={!currentLogo || isGenerating}
+          className={`
+            p-3 rounded-lg border transition-all
+            ${!currentLogo || isGenerating 
+              ? 'bg-white border-gray-200 text-gray-300 cursor-not-allowed' 
+              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 hover:text-black'}
+          `}
+          title="View Fullscreen"
         >
-          <Maximize2 size={20} />
-          <span className="text-sm">View Full Size</span>
+          <Maximize2 size={18} />
         </button>
 
       </div>

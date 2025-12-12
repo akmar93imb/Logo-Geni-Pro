@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { LogoFormValues } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || 'FAKE_API_KEY_FOR_DEVELOPMENT' });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const generateSingleLogo = async (
   values: LogoFormValues, 
