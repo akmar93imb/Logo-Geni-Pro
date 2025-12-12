@@ -1,0 +1,5 @@
+{
+  "name": "LogoGenie Pro",
+  "description": "A professional AI-powered logo generator that creates unique, high-quality brand identities using the 'gemini-2.5-flash-image' model.",
+  "requestFramePermissions": []
+}
