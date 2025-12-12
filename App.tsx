@@ -13,6 +13,7 @@ const INITIAL_FORM_STATE: LogoFormValues = {
   style: LogoStyle.MINIMALIST,
   colors: '',
   variationCount: 1,
+  referenceImage: undefined,
 };
 
 export default function App() {
@@ -22,7 +23,7 @@ export default function App() {
   const [history, setHistory] = useState<GeneratedLogo[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const handleInputChange = (field: keyof LogoFormValues, value: string | number) => {
+  const handleInputChange = (field: keyof LogoFormValues, value: string | number | undefined) => {
     setFormValues((prev) => ({ ...prev, [field]: value }));
     setError(null);
   };
@@ -63,6 +64,7 @@ export default function App() {
     setError(null);
     
     const remixValues = { ...formValues };
+    // Ensure we generate at least 2 variations for a remix to show options
     if (remixValues.variationCount < 2) {
       remixValues.variationCount = 2;
       setFormValues(prev => ({ ...prev, variationCount: 2 }));

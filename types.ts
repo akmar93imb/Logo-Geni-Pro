@@ -14,6 +14,7 @@ export interface LogoFormValues {
   style: LogoStyle;
   colors: string;
   variationCount: number;
+  referenceImage?: string;
 }
 
 export interface GeneratedLogo {

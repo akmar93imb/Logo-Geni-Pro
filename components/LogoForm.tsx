@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { LogoFormValues, LogoStyle } from '../types';
-import { Loader2, Sparkles, Palette, Type, AlignLeft, Layers, Copy } from 'lucide-react';
+import { Loader2, Sparkles, Palette, Type, AlignLeft, Layers, Upload, X, Image as ImageIcon } from 'lucide-react';
 
 interface LogoFormProps {
   values: LogoFormValues;
-  onChange: (field: keyof LogoFormValues, value: string | number) => void;
+  onChange: (field: keyof LogoFormValues, value: string | number | undefined) => void;
   onSubmit: () => void;
   isGenerating: boolean;
 }
 
 export const LogoForm: React.FC<LogoFormProps> = ({ values, onChange, onSubmit, isGenerating }) => {
-  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const styles = [
     { label: "Minimalist", value: LogoStyle.MINIMALIST, color: "bg-blue-500" },
     { label: "Abstract", value: LogoStyle.ABSTRACT, color: "bg-purple-500" },
@@ -22,6 +23,24 @@ export const LogoForm: React.FC<LogoFormProps> = ({ values, onChange, onSubmit, 
 
   const counts = [1, 2, 3, 4];
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onChange('referenceImage', reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearImage = () => {
+    onChange('referenceImage', undefined);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="bg-slate-900/80 backdrop-blur-md rounded-3xl p-6 shadow-2xl border border-slate-700 h-full flex flex-col overflow-y-auto custom-scrollbar">
       
@@ -30,7 +49,7 @@ export const LogoForm: React.FC<LogoFormProps> = ({ values, onChange, onSubmit, 
           <Sparkles className="text-brand-400" />
           Configuration
         </h2>
-        <p className="text-slate-400 text-sm mt-1">Define your brand identity.</p>
+        <p className="text-slate-400 text-sm mt-1">Define your brand identity or upload a sketch.</p>
       </div>
 
       <div className="space-y-8 flex-grow">
@@ -70,12 +89,12 @@ export const LogoForm: React.FC<LogoFormProps> = ({ values, onChange, onSubmit, 
           </div>
 
            <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-300">Description</label>
+            <label className="text-sm font-medium text-slate-300">Description / Brief</label>
             <div className="relative">
               <textarea
                 value={values.description}
                 onChange={(e) => onChange('description', e.target.value)}
-                placeholder="Describe your business, target audience, and key elements you want in the logo..."
+                placeholder="Describe your business. If uploading a photo, describe how you want to revise or fix it..."
                 rows={3}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all outline-none resize-none"
               />
@@ -83,7 +102,55 @@ export const LogoForm: React.FC<LogoFormProps> = ({ values, onChange, onSubmit, 
           </div>
         </section>
 
-        {/* Section 2: Visual Style */}
+        {/* Section 2: Reference Image */}
+        <section className="space-y-4">
+           <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+            Reference / Revision (Optional)
+          </h3>
+          
+          <div className="space-y-2">
+            {!values.referenceImage ? (
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center text-slate-500 hover:border-brand-500 hover:text-brand-400 hover:bg-slate-800/50 transition-all cursor-pointer relative group"
+              >
+                <input 
+                  ref={fileInputRef}
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <div className="bg-slate-800 p-3 rounded-full mb-3 group-hover:bg-slate-700 transition-colors">
+                   <Upload size={20} />
+                </div>
+                <p className="text-sm font-medium text-center">Upload Sketch or Logo</p>
+                <p className="text-xs text-center opacity-60 mt-1">To revise or redesign</p>
+              </div>
+            ) : (
+              <div className="relative rounded-xl overflow-hidden border border-brand-500/50 bg-slate-900 group shadow-lg shadow-brand-900/20">
+                <div className="absolute top-2 left-2 z-10 bg-brand-600 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider shadow-sm flex items-center gap-1">
+                   <ImageIcon size={10} /> Reference Active
+                </div>
+                <img 
+                  src={values.referenceImage} 
+                  alt="Reference" 
+                  className="w-full h-40 object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
+                <button 
+                  onClick={clearImage}
+                  className="absolute top-2 right-2 bg-slate-900/80 hover:bg-red-500 text-white p-2 rounded-lg backdrop-blur-sm transition-all border border-slate-700 hover:border-red-400 shadow-xl"
+                  title="Remove image"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Section 3: Visual Style */}
         <section className="space-y-4">
           <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
             Visual Identity

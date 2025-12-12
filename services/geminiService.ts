@@ -5,15 +5,18 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const generateSingleLogo = async (
   values: LogoFormValues, 
-  baseImageBase64?: string
+  remixImageBase64?: string
 ): Promise<string> => {
-  const { brandName, tagline, description, style, colors } = values;
+  const { brandName, tagline, description, style, colors, referenceImage } = values;
+
+  // Determine which image to use (Remix takes priority, then Uploaded Reference)
+  const imageToUse = remixImageBase64 || referenceImage;
 
   let fullPrompt = `
     Design a professional vector logo for a brand named "${brandName}".
     ${tagline ? `Tagline text: "${tagline}".` : ''}
     
-    The business concept is: ${description}.
+    The business concept/brief is: ${description}.
     
     Visual Style: ${style}.
     Color Palette: ${colors}.
@@ -29,22 +32,32 @@ const generateSingleLogo = async (
 
   const parts: any[] = [];
 
-  if (baseImageBase64) {
-    // If remixing, add the image and adjust prompt
-    fullPrompt += `
-      \nTASK: Create a fresh variation based on the attached reference logo.
-      Keep the core brand identity and color scheme, but explore a different composition or artistic execution.
-      Make it distinct from the original.
-    `;
+  if (imageToUse) {
+    if (remixImageBase64) {
+      // Logic for remixing a generated result
+      fullPrompt += `
+        \nTASK: Create a fresh variation based on the attached reference logo.
+        Keep the core brand identity and color scheme, but explore a different composition or artistic execution.
+        Make it distinct from the original.
+      `;
+    } else {
+      // Logic for uploaded reference (Revision Brief)
+      fullPrompt += `
+        \nTASK: Use the attached image as a visual reference, sketch, or previous logo draft.
+        Analyze this reference and SOLVE its design problems based on the brief provided above.
+        Revise and improve it to be more professional, balanced, and aesthetically pleasing.
+        Create a new, polished version that aligns with the requirements.
+      `;
+    }
     
     // Extract base64 if it contains the data: prefix
-    const cleanBase64 = baseImageBase64.includes('base64,') 
-      ? baseImageBase64.split('base64,')[1] 
-      : baseImageBase64;
+    const cleanBase64 = imageToUse.includes('base64,') 
+      ? imageToUse.split('base64,')[1] 
+      : imageToUse;
 
     parts.push({
       inlineData: {
-        mimeType: 'image/png',
+        mimeType: 'image/png', // Defaulting to PNG, GenAI handles most common types automatically
         data: cleanBase64
       }
     });
