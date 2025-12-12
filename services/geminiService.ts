@@ -3,11 +3,13 @@ import { LogoFormValues } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-export const generateLogoImage = async (values: LogoFormValues): Promise<string> => {
+const generateSingleLogo = async (
+  values: LogoFormValues, 
+  baseImageBase64?: string
+): Promise<string> => {
   const { brandName, tagline, description, style, colors } = values;
 
-  // Construct a highly optimized prompt for logo design
-  const fullPrompt = `
+  let fullPrompt = `
     Design a professional vector logo for a brand named "${brandName}".
     ${tagline ? `Tagline text: "${tagline}".` : ''}
     
@@ -25,23 +27,43 @@ export const generateLogoImage = async (values: LogoFormValues): Promise<string>
     - Do not include photorealistic elements, keep it graphical and symbolic.
   `;
 
+  const parts: any[] = [];
+
+  if (baseImageBase64) {
+    // If remixing, add the image and adjust prompt
+    fullPrompt += `
+      \nTASK: Create a fresh variation based on the attached reference logo.
+      Keep the core brand identity and color scheme, but explore a different composition or artistic execution.
+      Make it distinct from the original.
+    `;
+    
+    // Extract base64 if it contains the data: prefix
+    const cleanBase64 = baseImageBase64.includes('base64,') 
+      ? baseImageBase64.split('base64,')[1] 
+      : baseImageBase64;
+
+    parts.push({
+      inlineData: {
+        mimeType: 'image/png',
+        data: cleanBase64
+      }
+    });
+  }
+
+  parts.push({ text: fullPrompt });
+
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image', // Using the standard image generation model
+      model: 'gemini-2.5-flash-image',
       contents: {
-        parts: [
-          {
-            text: fullPrompt,
-          },
-        ],
+        parts: parts,
       },
       config: {
-        // We don't use responseMimeType for this model as per guidelines
-        // We let the model determine optimal output, usually comes as inlineData
+        // Temperature helps with variety when generating multiple
+        temperature: 1, 
       },
     });
 
-    // Extract the image from the response
     if (response.candidates && response.candidates.length > 0) {
       const content = response.candidates[0].content;
       if (content && content.parts) {
@@ -60,4 +82,18 @@ export const generateLogoImage = async (values: LogoFormValues): Promise<string>
     console.error("Logo Generation Error:", error);
     throw error;
   }
+};
+
+export const generateLogoImages = async (
+  values: LogoFormValues, 
+  baseImageBase64?: string
+): Promise<string[]> => {
+  // If variationCount is not set, default to 1
+  const count = values.variationCount || 1;
+  
+  // Create an array of promises to run in parallel
+  const promises = Array(count).fill(null).map(() => generateSingleLogo(values, baseImageBase64));
+  
+  // Wait for all to finish
+  return Promise.all(promises);
 };

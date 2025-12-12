@@ -13,6 +13,7 @@ export interface LogoFormValues {
   description: string;
   style: LogoStyle;
   colors: string;
+  variationCount: number;
 }
 
 export interface GeneratedLogo {
@@ -20,4 +21,5 @@ export interface GeneratedLogo {
   imageUrl: string;
   prompt: string;
   createdAt: number;
+  parentId?: string;
 }
